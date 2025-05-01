@@ -1,211 +1,88 @@
 # Telecom Customer Churn Prediction
 
-## 📊 Project Overview
-This project implements a machine learning solution to predict customer churn in a telecommunications company. The application uses a Random Forest Classifier to predict the probability of a customer leaving the service, helping telecom companies proactively retain customers and reduce churn rates.
+## Overview
+This project focuses on predicting customer churn in the telecommunications industry. Customer churn occurs when customers discontinue their service with a company. In the highly competitive telecom sector, where annual churn rates range from 15-25%, predicting and preventing customer churn is crucial for business success.
 
-## 🎯 Business Impact
-- **Cost Reduction**: Early identification of potential churners helps reduce customer acquisition costs
-- **Revenue Protection**: Proactive retention strategies help maintain revenue streams
-- **Customer Satisfaction**: Targeted interventions improve customer experience
-- **Resource Optimization**: Better allocation of retention resources based on churn risk
+## Business Impact
+- Customer retention is more cost-effective than acquiring new customers
+- Early detection of potential churn helps focus retention efforts on high-risk customers
+- Reducing churn directly impacts company profitability and market position
 
-## 🛠️ Technical Implementation
+## Dataset
+The project uses the [Telco Customer Churn](https://www.kaggle.com/bhartiprasad17/customer-churn-prediction/data) dataset, which includes:
+- Customer churn status
+- Service subscriptions (phone, internet, security, etc.)
+- Account information (tenure, contract, payment method)
+- Demographic data (gender, age, partner status, dependents)
 
-### Data Processing Pipeline
-1. **Data Cleaning**
-   - Handling missing values
-   - Converting data types
-   - Standardizing formats
+## Key Findings
 
-2. **Feature Engineering**
-   - One-hot encoding of categorical variables
-   - Numerical feature scaling
-   - Handling of special cases (e.g., "No internet service")
+### Customer Churn Analysis
+- 26.6% of customers switched to another provider
+- Gender has negligible impact on churn rates
+- Contract type significantly affects churn:
+  - 75% of month-to-month customers churned
+  - 13% of one-year contract customers churned
+  - 3% of two-year contract customers churned
 
-3. **Model Training**
-   - Random Forest Classifier implementation
-   - Hyperparameter tuning
-   - Cross-validation
-   - Feature importance analysis
+### Payment Methods
+- Electronic check users have higher churn rates
+- Automatic payment methods (credit card, bank transfer) show lower churn rates
+
+### Service Impact
+- Fiber optic customers show higher churn rates compared to DSL
+- Customers without tech support are more likely to churn
+- Lack of online security is a major factor in customer churn
+
+### Customer Demographics
+- Senior citizens show higher churn rates
+- Customers without dependents are more likely to churn
+- Paperless billing customers have higher churn rates
+
+### Financial Factors
+- Higher monthly charges correlate with increased churn
+- New customers (shorter tenure) show higher churn rates
+
+## Machine Learning Implementation
+
+### Models Evaluated
+1. Logistic Regression
+2. K-Nearest Neighbors
+3. Naive Bayes
+4. Decision Trees
+5. Random Forest
+6. AdaBoost
+7. Gradient Boosting
+8. Voting Classifier
+
+### Final Model
+A Voting Classifier combining:
+- Gradient Boosting
+- Logistic Regression
+- AdaBoost
 
 ### Model Performance
-- **Accuracy**: 79%
-- **Precision**: 
-  - No Churn: 0.82
-  - Churn: 0.63
-- **Recall**:
-  - No Churn: 0.90
-  - Churn: 0.46
+- Final Accuracy: 84.68%
+- Confusion Matrix Analysis:
+  - True Negatives: 1400
+  - False Positives: 149
+  - False Negatives: 280
+  - True Positives: 281
 
-### Key Features Identified
-1. Contract Type
-2. Monthly Charges
-3. Internet Service Type
-4. Payment Method
-5. Tech Support Availability
+## Technical Implementation
+- Libraries: scikit-learn, Matplotlib, pandas, seaborn, NumPy
+- Model Evaluation: K-fold cross-validation
+- Feature Engineering: Comprehensive preprocessing of categorical and numerical features
 
-## 💻 Interactive Web Application
+## Future Improvements
+- Hyperparameter tuning
+- Advanced feature engineering
+- Ensemble method optimization
 
-### Features
-1. **Real-time Prediction**
-   - Instant churn probability calculation
-   - Visual risk assessment
-   - Detailed recommendations
+## Contact
+For feedback or questions, please reach out at pradnyapatil671@gmail.com
 
-2. **User Interface**
-   - Intuitive input forms
-   - Interactive visualizations
-   - Responsive design
-
-3. **Risk Assessment**
-   - Color-coded risk levels
-   - Customized recommendations
-   - Actionable insights
-
-### Input Parameters
-- Customer Demographics
-  - Gender
-  - Senior Citizen Status
-  - Partner Status
-  - Dependents
-
-- Service Details
-  - Tenure
-  - Contract Type
-  - Monthly Charges
-  - Total Charges
-  - Payment Method
-
-- Service Features
-  - Phone Service
-  - Internet Service
-  - Online Security
-  - Online Backup
-  - Device Protection
-  - Tech Support
-  - Streaming Services
-
-## 📁 Project Structure
-```
-├── data/
-│   ├── raw/           # Raw data files
-│   └── processed/     # Processed data files
-├── models/            # Trained model files
-├── src/
-│   ├── data/         # Data processing modules
-│   ├── models/       # Model training modules
-│   └── app.py        # Streamlit application
-├── requirements.txt   # Project dependencies
-└── README.md         # Project documentation
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.8+
-- pip (Python package manager)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Shivanshu2407/Customer-Churn-Analysis.git
-cd Customer-Churn-Analysis
-```
-
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-### Usage
-
-1. Process the data:
-```bash
-python src/data/data_processor.py
-```
-
-2. Train the model:
-```bash
-python src/models/model_trainer.py
-```
-
-3. Run the Streamlit app:
-```bash
-streamlit run src/app.py
-```
-
-## 🔍 Model Insights
-
-### Key Findings
-1. **Contract Impact**
-   - Month-to-month contracts have higher churn rates
-   - Longer contracts show better retention
-
-2. **Service Quality**
-   - Tech support availability reduces churn
-   - Internet service type significantly affects retention
-
-3. **Financial Factors**
-   - Higher monthly charges correlate with increased churn
-   - Payment method affects customer satisfaction
-
-### Recommendations
-1. **High-Risk Customers**
-   - Immediate outreach
-   - Retention packages
-   - Service plan adjustments
-
-2. **Medium-Risk Customers**
-   - Proactive communication
-   - Promotional offers
-   - Service upgrades
-
-3. **Low-Risk Customers**
-   - Regular engagement
-   - Premium service upselling
-   - Feedback collection
-
-## 🛠️ Technologies Used
-- Python
-- Scikit-learn
-- Pandas
-- NumPy
-- Streamlit
-- Matplotlib
-- Seaborn
-- Joblib
-
-## 🔄 Future Improvements
-1. **Model Enhancement**
-   - Deep learning integration
-   - Ensemble methods
-   - Real-time model updates
-
-2. **Feature Engineering**
-   - Additional customer metrics
-   - Behavioral patterns
-   - Usage trends
-
-3. **Application Features**
-   - Batch prediction
-   - Historical analysis
-   - Custom reporting
-
-## 📊 Live Demo
-Access the live application at: [Telecom Churn Prediction App](https://shivanshu2407-customer-churn-analysis-srcapp-b4z2jc.streamlit.app/)
-
-## 👥 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📝 License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 📧 Contact
-For any queries or suggestions, please reach out through GitHub issues or pull requests. 
+## Author
+Hi, I'm Shivanshu!
+- AI Enthusiast
+- Data Science & ML practitioner 
