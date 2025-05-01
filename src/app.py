@@ -121,6 +121,30 @@ class ChurnPredictor:
             st.error(f"Error making prediction: {str(e)}")
             return None
 
+    def get_feature_importance(self, input_data):
+        """Get feature importance for the prediction."""
+        try:
+            processed_data = self.process_input_data(input_data)
+            if processed_data is None:
+                return None
+
+            # Get feature importances
+            importances = self.model.feature_importances_
+            
+            # Create DataFrame with feature names and importances
+            feature_importance = pd.DataFrame({
+                'Feature': self.feature_names,
+                'Importance': importances
+            })
+            
+            # Sort by importance
+            feature_importance = feature_importance.sort_values('Importance', ascending=False)
+            
+            return feature_importance
+        except Exception as e:
+            st.error(f"Error getting feature importance: {str(e)}")
+            return None
+
 def load_model():
     try:
         model_path = Path(__file__).parent.parent / "models" / "random_forest_model.joblib"
@@ -156,6 +180,54 @@ def create_gauge_chart(value, title):
     ax.set_title(title)
     ax.axis('off')
     
+    return fig
+
+def plot_feature_importance(feature_importance):
+    """Plot feature importance."""
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=feature_importance.head(10), x='Importance', y='Feature')
+    plt.title('Top 10 Factors Affecting Churn Prediction')
+    plt.xlabel('Importance')
+    plt.ylabel('Feature')
+    plt.tight_layout()
+    return plt.gcf()
+
+def plot_customer_profile(input_data):
+    """Plot customer profile visualization."""
+    # Create a figure with subplots
+    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+    
+    # 1. Contract and Payment Method
+    contract_payment = pd.DataFrame({
+        'Category': ['Contract', 'Payment Method'],
+        'Value': [input_data['Contract'], input_data['PaymentMethod']]
+    })
+    sns.barplot(data=contract_payment, x='Category', y='Value', ax=axes[0,0])
+    axes[0,0].set_title('Contract & Payment Method')
+    axes[0,0].tick_params(axis='x', rotation=45)
+    
+    # 2. Service Features
+    services = ['PhoneService', 'InternetService', 'OnlineSecurity', 'TechSupport']
+    service_values = [input_data[service] for service in services]
+    sns.barplot(x=services, y=service_values, ax=axes[0,1])
+    axes[0,1].set_title('Service Features')
+    axes[0,1].tick_params(axis='x', rotation=45)
+    
+    # 3. Charges Distribution
+    charges = ['MonthlyCharges', 'TotalCharges']
+    charge_values = [input_data['MonthlyCharges'], input_data['TotalCharges']]
+    sns.barplot(x=charges, y=charge_values, ax=axes[1,0])
+    axes[1,0].set_title('Charges Distribution')
+    
+    # 4. Customer Demographics
+    demographics = ['SeniorCitizen', 'Partner', 'Dependents']
+    demo_values = [input_data['SeniorCitizen'], 
+                  1 if input_data['Partner'] == 'Yes' else 0,
+                  1 if input_data['Dependents'] == 'Yes' else 0]
+    sns.barplot(x=demographics, y=demo_values, ax=axes[1,1])
+    axes[1,1].set_title('Customer Demographics')
+    
+    plt.tight_layout()
     return fig
 
 def main():
@@ -331,6 +403,48 @@ def main():
                 - Consider service plan adjustments
                 - Address any service issues
                 """)
+
+            # Display feature importance
+            st.subheader("Key Factors Affecting Prediction")
+            feature_importance = predictor.get_feature_importance(input_data)
+            if feature_importance is not None:
+                fig = plot_feature_importance(feature_importance)
+                st.pyplot(fig)
+                plt.close()
+
+            # Display customer profile
+            st.subheader("Customer Profile Analysis")
+            fig = plot_customer_profile(input_data)
+            st.pyplot(fig)
+            plt.close()
+
+            # Display detailed analysis
+            st.subheader("Detailed Analysis")
+            st.markdown("""
+            ### Key Insights:
+            1. **Contract Impact**
+               - Current contract type: {}
+               - Contract influence on churn: {:.2f}%
+            
+            2. **Service Quality**
+               - Internet service type: {}
+               - Tech support availability: {}
+               - Service quality impact: {:.2f}%
+            
+            3. **Financial Factors**
+               - Monthly charges: ${:.2f}
+               - Total charges: ${:.2f}
+               - Financial impact: {:.2f}%
+            """.format(
+                input_data['Contract'],
+                feature_importance[feature_importance['Feature'].str.contains('Contract')]['Importance'].sum() * 100,
+                input_data['InternetService'],
+                input_data['TechSupport'],
+                feature_importance[feature_importance['Feature'].str.contains('InternetService|TechSupport')]['Importance'].sum() * 100,
+                input_data['MonthlyCharges'],
+                input_data['TotalCharges'],
+                feature_importance[feature_importance['Feature'].str.contains('Charges')]['Importance'].sum() * 100
+            ))
 
 if __name__ == "__main__":
     main() 
