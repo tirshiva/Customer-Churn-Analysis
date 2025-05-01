@@ -250,6 +250,67 @@ def main():
     st.sidebar.title("📱 Telecom Churn Prediction")
     st.sidebar.markdown("---")
     
+    # Add feature descriptions
+    st.sidebar.subheader("Feature Descriptions")
+    with st.sidebar.expander("Customer Information", expanded=True):
+        st.markdown("""
+        **Tenure**: Number of months the customer has stayed with the company
+        - Longer tenure → Lower churn risk
+        - Shorter tenure → Higher churn risk
+
+        **Monthly Charges**: Amount charged to the customer monthly
+        - Higher charges → Higher churn risk
+        - Lower charges → Lower churn risk
+
+        **Total Charges**: Total amount charged to the customer
+        - Higher total charges → Lower churn risk (indicates loyalty)
+        - Lower total charges → Higher churn risk
+
+        **Contract Type**: Type of contract the customer has
+        - Month-to-month → Higher churn risk
+        - One year → Medium churn risk
+        - Two year → Lower churn risk
+
+        **Payment Method**: How the customer pays their bills
+        - Electronic check → Higher churn risk
+        - Automatic payments → Lower churn risk
+        """)
+
+    with st.sidebar.expander("Service Features", expanded=True):
+        st.markdown("""
+        **Internet Service**: Type of internet service
+        - Fiber optic → Higher churn risk (more competition)
+        - DSL → Lower churn risk
+        - No internet → Lower churn risk
+
+        **Tech Support**: Availability of technical support
+        - No tech support → Higher churn risk
+        - Tech support → Lower churn risk
+
+        **Online Security**: Online security service
+        - No security → Higher churn risk
+        - Security → Lower churn risk
+
+        **Phone Service**: Whether the customer has phone service
+        - No phone → Higher churn risk
+        - Phone service → Lower churn risk
+        """)
+
+    with st.sidebar.expander("Customer Demographics", expanded=True):
+        st.markdown("""
+        **Senior Citizen**: Whether the customer is a senior citizen
+        - Senior citizen → Higher churn risk
+        - Non-senior → Lower churn risk
+
+        **Partner**: Whether the customer has a partner
+        - No partner → Higher churn risk
+        - Has partner → Lower churn risk
+
+        **Dependents**: Whether the customer has dependents
+        - No dependents → Higher churn risk
+        - Has dependents → Lower churn risk
+        """)
+
     # Load model
     predictor = load_model()
     if predictor is None:
