@@ -79,8 +79,11 @@ A Voting Classifier combining:
 - Advanced feature engineering
 - Ensemble method optimization
 
+## Live Application
+Access the live application at: [Telecom Churn Prediction App](https://shivanshu2407-customer-churn-analysis-srcapp-b4z2jc.streamlit.app/)
+
 ## Contact
-For feedback or questions, please reach out at pradnyapatil671@gmail.com
+For feedback or questions, please reach out at st955218@gmail.com
 
 ## Author
 Hi, I'm Shivanshu!
