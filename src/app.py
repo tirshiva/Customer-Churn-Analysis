@@ -5,7 +5,6 @@ import joblib
 from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
-from data.data_processor import DataProcessor
 
 # Set page configuration
 st.set_page_config(
@@ -30,11 +29,48 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+class DataProcessor:
+    def __init__(self, data=None):
+        self.data = data
+
+    def preprocess_data(self):
+        """Preprocess the data."""
+        try:
+            # Create a copy of the data
+            processed_data = self.data.copy()
+
+            # Convert TotalCharges to numeric
+            processed_data['TotalCharges'] = pd.to_numeric(processed_data['TotalCharges'], errors='coerce')
+
+            # Fill missing values
+            numeric_columns = ['tenure', 'MonthlyCharges', 'TotalCharges']
+            for col in numeric_columns:
+                processed_data[col].fillna(processed_data[col].median(), inplace=True)
+
+            # One-hot encode categorical variables
+            categorical_columns = [
+                'gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines',
+                'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+                'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract',
+                'PaperlessBilling', 'PaymentMethod'
+            ]
+
+            # One-hot encode each categorical column
+            for col in categorical_columns:
+                if col in processed_data.columns:
+                    dummies = pd.get_dummies(processed_data[col], prefix=col)
+                    processed_data = pd.concat([processed_data, dummies], axis=1)
+                    processed_data.drop(col, axis=1, inplace=True)
+
+            return processed_data
+        except Exception as e:
+            st.error(f"Error in preprocessing data: {str(e)}")
+            return None
+
 class ChurnPredictor:
     def __init__(self, model_path):
         try:
             self.model = joblib.load(model_path)
-            # Store the feature names from the model
             self.feature_names = self.model.feature_names_in_
         except Exception as e:
             st.error(f"Error loading model: {str(e)}")
@@ -42,16 +78,13 @@ class ChurnPredictor:
             self.feature_names = None
 
     def process_input_data(self, input_data):
-        """Process input data using the same logic as DataProcessor."""
+        """Process input data using DataProcessor."""
         try:
             # Create DataFrame with single row
             df = pd.DataFrame([input_data])
             
-            # Create DataProcessor instance (without loading data)
-            processor = DataProcessor("")
-            processor.data = df
-            
             # Process the data
+            processor = DataProcessor(df)
             processed_data = processor.preprocess_data()
             
             if processed_data is None:
@@ -90,7 +123,7 @@ class ChurnPredictor:
 
 def load_model():
     try:
-        model_path = Path("models/random_forest_model.joblib")
+        model_path = Path(__file__).parent.parent / "models" / "random_forest_model.joblib"
         predictor = ChurnPredictor(model_path)
         return predictor
     except Exception as e:
@@ -145,7 +178,6 @@ def main():
 
     with col1:
         st.subheader("Customer Information")
-        # Add input fields for customer information
         tenure = st.number_input("Tenure (months)", min_value=0, max_value=100, value=12)
         monthly_charges = st.number_input("Monthly Charges ($)", min_value=0.0, max_value=200.0, value=50.0)
         total_charges = st.number_input("Total Charges ($)", min_value=0.0, max_value=10000.0, value=600.0)
@@ -255,45 +287,50 @@ def main():
         'PaymentMethod': payment_method
     }
 
-    # Prediction button
+    # Add a predict button
     if st.button("Predict Churn Probability"):
         # Make prediction
         prediction = predictor.predict(input_data)
+        
         if prediction is not None:
-            churn_probability = prediction[0][1] * 100  # Probability of churn as percentage
-
-            # Display prediction results
-            st.markdown("---")
-            st.subheader("Prediction Results")
+            # Get the churn probability
+            churn_prob = prediction[0][1] * 100
             
-            # Create and display gauge chart
-            fig = create_gauge_chart(churn_probability, "Churn Probability")
+            # Display the gauge chart
+            st.subheader("Churn Probability")
+            fig = create_gauge_chart(churn_prob, "Customer Churn Risk")
             st.pyplot(fig)
             plt.close()
-
-            # Display recommendation
-            st.subheader("Recommendation")
-            if churn_probability < 30:
-                st.success("Low churn risk! Customer is likely to stay.")
-            elif churn_probability < 70:
-                st.warning("Medium churn risk! Consider retention strategies.")
+            
+            # Display risk level and recommendations
+            st.subheader("Risk Assessment")
+            if churn_prob < 30:
+                st.success("Low Risk of Churn")
+                st.markdown("""
+                **Recommendations:**
+                - Continue providing excellent service
+                - Consider upselling premium services
+                - Collect feedback for further improvements
+                """)
+            elif churn_prob < 70:
+                st.warning("Medium Risk of Churn")
+                st.markdown("""
+                **Recommendations:**
+                - Proactively reach out to understand concerns
+                - Offer promotional discounts
+                - Review service usage patterns
+                - Consider service upgrades
+                """)
             else:
-                st.error("High churn risk! Immediate action required.")
-
-            # Display key factors
-            st.subheader("Key Factors")
-            feature_importance = pd.DataFrame({
-                'Feature': predictor.model.feature_names_in_,
-                'Importance': predictor.model.feature_importances_
-            }).sort_values('Importance', ascending=False)
-
-            # Create feature importance plot
-            plt.figure(figsize=(10, 6))
-            sns.barplot(data=feature_importance.head(5), x='Importance', y='Feature')
-            plt.title('Top 5 Factors Affecting Churn')
-            plt.tight_layout()
-            st.pyplot(plt)
-            plt.close()
+                st.error("High Risk of Churn")
+                st.markdown("""
+                **Recommendations:**
+                - Immediate customer outreach
+                - Offer retention packages
+                - Schedule account review
+                - Consider service plan adjustments
+                - Address any service issues
+                """)
 
 if __name__ == "__main__":
     main() 
