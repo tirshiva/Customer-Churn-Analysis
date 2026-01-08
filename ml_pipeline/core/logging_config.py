@@ -1,4 +1,4 @@
-"""Logging configuration."""
+"""Logging configuration for ML pipeline."""
 
 import logging
 import sys
@@ -7,7 +7,7 @@ from logging.handlers import RotatingFileHandler
 
 
 def setup_logging(log_level: str = "INFO") -> None:
-    """Configure application logging."""
+    """Configure logging for ML pipeline."""
     # Create logs directory
     log_dir = Path(__file__).parent.parent.parent / "logs"
     log_dir.mkdir(exist_ok=True)
@@ -15,6 +15,9 @@ def setup_logging(log_level: str = "INFO") -> None:
     # Configure root logger
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, log_level.upper()))
+
+    # Remove existing handlers
+    logger.handlers.clear()
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
@@ -27,7 +30,7 @@ def setup_logging(log_level: str = "INFO") -> None:
 
     # File handler
     file_handler = RotatingFileHandler(
-        log_dir / "app.log", maxBytes=10 * 1024 * 1024, backupCount=5  # 10MB
+        log_dir / "ml_pipeline.log", maxBytes=10 * 1024 * 1024, backupCount=5  # 10MB
     )
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(
@@ -39,6 +42,3 @@ def setup_logging(log_level: str = "INFO") -> None:
     # Add handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
-
-    # Suppress noisy loggers
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
