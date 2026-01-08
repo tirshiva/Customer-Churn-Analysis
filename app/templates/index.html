@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Churn Prediction - Home{% endblock %}
+
+{% block content %}
+<div class="card mt-4">
+    <div class="card-header text-center">
+        <h1 class="mb-0">
+            <i class="fas fa-chart-line me-2"></i>
+            Telecom Customer Churn Prediction
+        </h1>
+        <p class="mb-0 mt-2">Predict customer churn probability using machine learning</p>
+    </div>
+    <div class="card-body p-4">
+        {% if error_message %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/predict" id="predictionForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3 text-primary">
+                        <i class="fas fa-user me-2"></i>Customer Information
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label for="tenure" class="form-label">Tenure (months) *</label>
+                        <input type="number" class="form-control" id="tenure" name="tenure" 
+                               min="0" max="100" value="12" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="monthly_charges" class="form-label">Monthly Charges ($) *</label>
+                        <input type="number" class="form-control" id="monthly_charges" 
+                               name="monthly_charges" min="0" max="200" step="0.01" value="50.0" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="total_charges" class="form-label">Total Charges ($) *</label>
+                        <input type="number" class="form-control" id="total_charges" 
+                               name="total_charges" min="0" max="10000" step="0.01" value="600.0" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="senior_citizen" class="form-label">Senior Citizen</label>
+                        <select class="form-select" id="senior_citizen" name="senior_citizen">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="partner" class="form-label">Partner</label>
+                        <select class="form-select" id="partner" name="partner">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dependents" class="form-label">Dependents</label>
+                        <select class="form-select" id="dependents" name="dependents">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contract" class="form-label">Contract Type</label>
+                        <select class="form-select" id="contract" name="contract">
+                            <option value="Month-to-month">Month-to-month</option>
+                            <option value="One year">One year</option>
+                            <option value="Two year">Two year</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="payment_method" class="form-label">Payment Method</label>
+                        <select class="form-select" id="payment_method" name="payment_method">
+                            <option value="Electronic check">Electronic check</option>
+                            <option value="Mailed check">Mailed check</option>
+                            <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+                            <option value="Credit card (automatic)">Credit card (automatic)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="mb-3 text-primary">
+                        <i class="fas fa-wifi me-2"></i>Service Information
+                    </h5>
+
+                    <div class="mb-3">
+                        <label for="phone_service" class="form-label">Phone Service</label>
+                        <select class="form-select" id="phone_service" name="phone_service">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="multiple_lines" class="form-label">Multiple Lines</label>
+                        <select class="form-select" id="multiple_lines" name="multiple_lines">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No phone service">No phone service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="internet_service" class="form-label">Internet Service</label>
+                        <select class="form-select" id="internet_service" name="internet_service">
+                            <option value="No">No</option>
+                            <option value="DSL">DSL</option>
+                            <option value="Fiber optic">Fiber optic</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="online_security" class="form-label">Online Security</label>
+                        <select class="form-select" id="online_security" name="online_security">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="online_backup" class="form-label">Online Backup</label>
+                        <select class="form-select" id="online_backup" name="online_backup">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="device_protection" class="form-label">Device Protection</label>
+                        <select class="form-select" id="device_protection" name="device_protection">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tech_support" class="form-label">Tech Support</label>
+                        <select class="form-select" id="tech_support" name="tech_support">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="streaming_tv" class="form-label">Streaming TV</label>
+                        <select class="form-select" id="streaming_tv" name="streaming_tv">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="streaming_movies" class="form-label">Streaming Movies</label>
+                        <select class="form-select" id="streaming_movies" name="streaming_movies">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="paperless_billing" class="form-label">Paperless Billing</label>
+                        <select class="form-select" id="paperless_billing" name="paperless_billing">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-calculator me-2"></i>Predict Churn Probability
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

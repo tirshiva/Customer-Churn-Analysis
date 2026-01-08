@@ -22,31 +22,47 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
+.venv
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
+*~
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+logs/
+*.log
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Model files
-*.joblib
-*.pkl
+# Model files (if too large)
+# models/*.joblib
+# models/*.pkl
 
-# Data files
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-
-# Logs
-*.log
+# Data files (if sensitive)
+# data/raw/*
+# data/processed/*
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Static files (if generated)
+# app/static/*
+
+# Model visualizations (optional - uncomment to ignore)
+# models/visualizations/*.png
