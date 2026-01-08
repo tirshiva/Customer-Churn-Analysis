@@ -1,9 +1,15 @@
 """Model evaluation module with comprehensive metrics."""
+
 import pandas as pd
 import numpy as np
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, confusion_matrix, classification_report
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix,
+    classification_report,
 )
 from typing import Optional, Dict, Any
 import logging
@@ -15,25 +21,22 @@ logger = logging.getLogger(__name__)
 
 class ModelEvaluator:
     """Handle comprehensive model evaluation."""
-    
+
     def __init__(self):
         """Initialize model evaluator."""
         self.evaluation_results: Dict[str, Any] = {}
-    
+
     def evaluate(
-        self,
-        model: Any,
-        X_test: pd.DataFrame,
-        y_test: pd.Series
+        self, model: Any, X_test: pd.DataFrame, y_test: pd.Series
     ) -> Dict[str, Any]:
         """
         Evaluate model performance.
-        
+
         Args:
             model: Trained model
             X_test: Test features
             y_test: Test target
-            
+
         Returns:
             Dictionary with evaluation metrics
         """
@@ -41,23 +44,23 @@ class ModelEvaluator:
             # Make predictions
             y_pred = model.predict(X_test)
             y_pred_proba = model.predict_proba(X_test)[:, 1]
-            
+
             # Calculate metrics
             accuracy = accuracy_score(y_test, y_pred)
             precision = precision_score(y_test, y_pred, zero_division=0)
             recall = recall_score(y_test, y_pred, zero_division=0)
             f1 = f1_score(y_test, y_pred, zero_division=0)
             roc_auc = roc_auc_score(y_test, y_pred_proba)
-            
+
             # Confusion matrix
             cm = confusion_matrix(y_test, y_pred)
             tn, fp, fn, tp = cm.ravel()
-            
+
             # Classification report
             class_report = classification_report(
                 y_test, y_pred, output_dict=True, zero_division=0
             )
-            
+
             # Store results
             self.evaluation_results = {
                 "accuracy": float(accuracy),
@@ -69,14 +72,14 @@ class ModelEvaluator:
                     "true_negatives": int(tn),
                     "false_positives": int(fp),
                     "false_negatives": int(fn),
-                    "true_positives": int(tp)
+                    "true_positives": int(tp),
                 },
                 "classification_report": class_report,
                 "test_samples": len(y_test),
                 "positive_samples": int(y_test.sum()),
-                "negative_samples": int(len(y_test) - y_test.sum())
+                "negative_samples": int(len(y_test) - y_test.sum()),
             }
-            
+
             # Log results
             logger.info("=" * 50)
             logger.info("MODEL EVALUATION RESULTS")
@@ -90,72 +93,75 @@ class ModelEvaluator:
             logger.info(f"  TN: {tn}, FP: {fp}")
             logger.info(f"  FN: {fn}, TP: {tp}")
             logger.info("=" * 50)
-            
+
             return self.evaluation_results
-            
+
         except Exception as e:
             logger.error(f"Error evaluating model: {str(e)}", exc_info=True)
             return {}
-    
-    def get_feature_importance(self, model: Any, feature_names: list) -> Dict[str, float]:
+
+    def get_feature_importance(
+        self, model: Any, feature_names: list
+    ) -> Dict[str, float]:
         """
         Get feature importance from model.
-        
+
         Args:
             model: Trained model
             feature_names: List of feature names
-            
+
         Returns:
             Dictionary mapping feature names to importance scores
         """
         try:
-            if not hasattr(model, 'feature_importances_'):
+            if not hasattr(model, "feature_importances_"):
                 logger.warning("Model does not support feature importances")
                 return {}
-            
+
             importances = model.feature_importances_
             feature_importance = dict(zip(feature_names, importances))
-            
+
             # Sort by importance
             sorted_importance = dict(
                 sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
             )
-            
+
             logger.info("Top 10 Most Important Features:")
-            for i, (feature, importance) in enumerate(list(sorted_importance.items())[:10], 1):
+            for i, (feature, importance) in enumerate(
+                list(sorted_importance.items())[:10], 1
+            ):
                 logger.info(f"  {i}. {feature}: {importance:.4f}")
-            
+
             return sorted_importance
-            
+
         except Exception as e:
             logger.error(f"Error getting feature importance: {str(e)}", exc_info=True)
             return {}
-    
+
     def save_evaluation_report(self, output_path: Path) -> bool:
         """
         Save evaluation results to JSON file.
-        
+
         Args:
             output_path: Path to save the report
-            
+
         Returns:
             True if successful, False otherwise
         """
         try:
             output_path = Path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(output_path, 'w') as f:
+
+            with open(output_path, "w") as f:
                 json.dump(self.evaluation_results, f, indent=2)
-            
+
             logger.info(f"Evaluation report saved to {output_path}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Error saving evaluation report: {str(e)}", exc_info=True)
             return False
-    
+
     def get_evaluation_results(self) -> Dict[str, Any]:
         """Get evaluation results."""
         return self.evaluation_results.copy()
-
