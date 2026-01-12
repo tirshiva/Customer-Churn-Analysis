@@ -25,11 +25,32 @@ class PredictionService:
     def _load_model(self) -> None:
         """Load the trained model."""
         try:
-            if not settings.MODEL_PATH.exists():
-                logger.error(f"Model file not found at {settings.MODEL_PATH}")
-                return
+            # Prefer explicit MODEL_PATH, but fall back gracefully if it doesn't exist
+            model_path: Path = settings.MODEL_PATH
 
-            loaded_data = joblib.load(settings.MODEL_PATH)
+            if not model_path.exists():
+                logger.warning(f"Model file not found at {model_path}")
+
+                # 1) Prefer ensemble model if available
+                ensemble_path = settings.MODEL_DIR / "ensemble_model.joblib"
+                if ensemble_path.exists():
+                    logger.info(f"Falling back to ensemble model at {ensemble_path}")
+                    model_path = ensemble_path
+                else:
+                    # 2) Fallback: look for any *_model.joblib file
+                    candidates = list(settings.MODEL_DIR.glob("*_model.joblib"))
+                    if candidates:
+                        candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+                        model_path = candidates[0]
+                        logger.info(f"Falling back to discovered model at {model_path}")
+                    else:
+                        logger.error(
+                            f"No suitable model file found in {settings.MODEL_DIR}. "
+                            "Please train the model first (e.g., `make train`)."
+                        )
+                        return
+
+            loaded_data = joblib.load(model_path)
 
             # Handle both old format (just model) and new format (dict with metadata)
             if isinstance(loaded_data, dict):
@@ -49,7 +70,7 @@ class PredictionService:
                     logger.warning("Model does not have feature_names_in_ attribute")
                     self.feature_names = None
 
-            logger.info(f"Model loaded successfully from {settings.MODEL_PATH}")
+            logger.info(f"Model loaded successfully from {model_path}")
             logger.info(f"Model type: {type(self.model).__name__}")
             if self.feature_names:
                 logger.info(f"Number of features: {len(self.feature_names)}")

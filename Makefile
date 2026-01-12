@@ -30,7 +30,11 @@ train:
 	python train_model.py
 
 run:
-	python run.py
+	@if [ -f "dev/bin/activate" ]; then \
+		source dev/bin/activate && python run.py; \
+	else \
+		python3 run.py; \
+	fi
 
 test:
 	pytest tests/ -v
