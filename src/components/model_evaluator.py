@@ -26,9 +26,7 @@ class ModelEvaluator:
         """Initialize model evaluator."""
         self.evaluation_results: Dict[str, Any] = {}
 
-    def evaluate(
-        self, model: Any, X_test: pd.DataFrame, y_test: pd.Series
-    ) -> Dict[str, Any]:
+    def evaluate(self, model: Any, X_test: pd.DataFrame, y_test: pd.Series) -> Dict[str, Any]:
         """
         Evaluate model performance.
 
@@ -50,7 +48,7 @@ class ModelEvaluator:
             precision = precision_score(y_test, y_pred, zero_division=0)
             recall = recall_score(y_test, y_pred, zero_division=0)
             f1 = f1_score(y_test, y_pred, zero_division=0)
-            
+
             # ROC AUC - handle edge cases
             try:
                 # Check if we have both classes in y_test
@@ -85,9 +83,7 @@ class ModelEvaluator:
                 tn, fp, fn, tp = 0, 0, 0, 0
 
             # Classification report
-            class_report = classification_report(
-                y_test, y_pred, output_dict=True, zero_division=0
-            )
+            class_report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
 
             # Store results
             self.evaluation_results = {
@@ -128,9 +124,7 @@ class ModelEvaluator:
             logger.error(f"Error evaluating model: {str(e)}", exc_info=True)
             return {}
 
-    def get_feature_importance(
-        self, model: Any, feature_names: list
-    ) -> Dict[str, float]:
+    def get_feature_importance(self, model: Any, feature_names: list) -> Dict[str, float]:
         """
         Get feature importance from model.
 
@@ -146,34 +140,32 @@ class ModelEvaluator:
             if hasattr(model, "estimators_"):
                 logger.info("Calculating feature importance for ensemble model...")
                 all_importances = []
-                
+
                 for name, estimator in model.named_estimators_.items():
                     if hasattr(estimator, "feature_importances_"):
                         all_importances.append(estimator.feature_importances_)
                     else:
                         logger.debug(f"Estimator {name} does not support feature importances")
-                
+
                 if not all_importances:
                     logger.warning("No estimators in ensemble support feature importances")
                     return {}
-                
+
                 # Average importances across all estimators
                 importances = np.mean(all_importances, axis=0)
                 feature_importance = dict(zip(feature_names, importances))
-                
+
                 # Sort by importance
                 sorted_importance = dict(
                     sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
                 )
-                
+
                 logger.info("Top 10 Most Important Features (Ensemble Average):")
-                for i, (feature, importance) in enumerate(
-                    list(sorted_importance.items())[:10], 1
-                ):
+                for i, (feature, importance) in enumerate(list(sorted_importance.items())[:10], 1):
                     logger.info(f"  {i}. {feature}: {importance:.4f}")
-                
+
                 return sorted_importance
-            
+
             # Handle regular models with feature_importances_
             elif hasattr(model, "feature_importances_"):
                 importances = model.feature_importances_
@@ -185,9 +177,7 @@ class ModelEvaluator:
                 )
 
                 logger.info("Top 10 Most Important Features:")
-                for i, (feature, importance) in enumerate(
-                    list(sorted_importance.items())[:10], 1
-                ):
+                for i, (feature, importance) in enumerate(list(sorted_importance.items())[:10], 1):
                     logger.info(f"  {i}. {feature}: {importance:.4f}")
 
                 return sorted_importance

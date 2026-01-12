@@ -26,14 +26,14 @@ def main():
         project_root = Path(__file__).parent
         
         # Define paths
-        data_path = project_root / "Scripts" / "data.csv"
+        data_path = project_root / "data" / "raw" / "data.csv"
         model_output_path = project_root / "models" / "best_model.joblib"
         evaluation_output_path = project_root / "models" / "evaluation_report.json"
         
         # Validate data path exists
         if not data_path.exists():
             logger.error(f"Data file not found at {data_path}")
-            logger.error("Please ensure the data file exists at Scripts/data.csv")
+            logger.error("Please ensure the data file exists at data/raw/data.csv")
             sys.exit(1)
         
         logger.info("=" * 70)

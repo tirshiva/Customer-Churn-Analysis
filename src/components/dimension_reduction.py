@@ -162,9 +162,7 @@ class DimensionReducer:
 
             # Scale if PCA was used
             if self.method == "pca" and self.scaler is not None:
-                X_scaled = pd.DataFrame(
-                    self.scaler.transform(X), columns=X.columns, index=X.index
-                )
+                X_scaled = pd.DataFrame(self.scaler.transform(X), columns=X.columns, index=X.index)
             else:
                 X_scaled = X
 
@@ -173,9 +171,7 @@ class DimensionReducer:
                 transformed = self.reducer.transform(X_scaled)
                 # Create DataFrame with component names
                 component_names = [f"PC{i+1}" for i in range(transformed.shape[1])]
-                result = pd.DataFrame(
-                    transformed, columns=component_names, index=X.index
-                )
+                result = pd.DataFrame(transformed, columns=component_names, index=X.index)
             else:
                 # For feature selection methods, just select features
                 if self.selected_features:
@@ -190,9 +186,7 @@ class DimensionReducer:
             logger.error(f"Error transforming data: {str(e)}", exc_info=True)
             return None
 
-    def _apply_pca(
-        self, X: pd.DataFrame, y: Optional[pd.Series]
-    ) -> Optional[pd.DataFrame]:
+    def _apply_pca(self, X: pd.DataFrame, y: Optional[pd.Series]) -> Optional[pd.DataFrame]:
         """Apply PCA dimension reduction."""
         try:
             # Determine number of components
@@ -209,9 +203,7 @@ class DimensionReducer:
                 n_components = min(self.n_components, X.shape[1])
 
             # Fit PCA
-            self.reducer = PCA(
-                n_components=n_components, random_state=self.random_state
-            )
+            self.reducer = PCA(n_components=n_components, random_state=self.random_state)
             transformed = self.reducer.fit_transform(X)
 
             # Create DataFrame
@@ -231,9 +223,7 @@ class DimensionReducer:
             logger.error(f"Error applying PCA: {str(e)}", exc_info=True)
             return None
 
-    def _apply_selectkbest(
-        self, X: pd.DataFrame, y: pd.Series
-    ) -> Optional[pd.DataFrame]:
+    def _apply_selectkbest(self, X: pd.DataFrame, y: pd.Series) -> Optional[pd.DataFrame]:
         """Apply SelectKBest feature selection."""
         try:
             if y is None:
@@ -256,9 +246,7 @@ class DimensionReducer:
             self.selected_features = [X.columns[i] for i in selected_indices]
 
             # Create DataFrame
-            result = pd.DataFrame(
-                transformed, columns=self.selected_features, index=X.index
-            )
+            result = pd.DataFrame(transformed, columns=self.selected_features, index=X.index)
 
             logger.info(f"SelectKBest: Selected {len(self.selected_features)} features")
 
@@ -268,9 +256,7 @@ class DimensionReducer:
             logger.error(f"Error applying SelectKBest: {str(e)}", exc_info=True)
             return None
 
-    def _apply_mutual_info(
-        self, X: pd.DataFrame, y: pd.Series
-    ) -> Optional[pd.DataFrame]:
+    def _apply_mutual_info(self, X: pd.DataFrame, y: pd.Series) -> Optional[pd.DataFrame]:
         """Apply mutual information feature selection."""
         try:
             if y is None:
@@ -292,13 +278,9 @@ class DimensionReducer:
             self.selected_features = [X.columns[i] for i in selected_indices]
 
             # Create DataFrame
-            result = pd.DataFrame(
-                transformed, columns=self.selected_features, index=X.index
-            )
+            result = pd.DataFrame(transformed, columns=self.selected_features, index=X.index)
 
-            logger.info(
-                f"Mutual Information: Selected {len(self.selected_features)} features"
-            )
+            logger.info(f"Mutual Information: Selected {len(self.selected_features)} features")
 
             return result
 
@@ -306,9 +288,7 @@ class DimensionReducer:
             logger.error(f"Error applying mutual information: {str(e)}", exc_info=True)
             return None
 
-    def _apply_select_from_model(
-        self, X: pd.DataFrame, y: pd.Series
-    ) -> Optional[pd.DataFrame]:
+    def _apply_select_from_model(self, X: pd.DataFrame, y: pd.Series) -> Optional[pd.DataFrame]:
         """Apply feature selection using model importance."""
         try:
             if y is None:
@@ -334,13 +314,9 @@ class DimensionReducer:
             self.selected_features = [X.columns[i] for i in selected_indices]
 
             # Create DataFrame
-            result = pd.DataFrame(
-                transformed, columns=self.selected_features, index=X.index
-            )
+            result = pd.DataFrame(transformed, columns=self.selected_features, index=X.index)
 
-            logger.info(
-                f"SelectFromModel: Selected {len(self.selected_features)} features"
-            )
+            logger.info(f"SelectFromModel: Selected {len(self.selected_features)} features")
             logger.info(f"  Threshold: {threshold:.6f}")
 
             return result
@@ -368,9 +344,7 @@ class DimensionReducer:
             )
 
             # Fit RFE
-            self.reducer = RFE(
-                estimator=estimator, n_features_to_select=n_features, step=1
-            )
+            self.reducer = RFE(estimator=estimator, n_features_to_select=n_features, step=1)
             transformed = self.reducer.fit_transform(X, y)
 
             # Get selected feature names
@@ -378,9 +352,7 @@ class DimensionReducer:
             self.selected_features = [X.columns[i] for i in selected_indices]
 
             # Create DataFrame
-            result = pd.DataFrame(
-                transformed, columns=self.selected_features, index=X.index
-            )
+            result = pd.DataFrame(transformed, columns=self.selected_features, index=X.index)
 
             logger.info(f"RFE: Selected {len(self.selected_features)} features")
 

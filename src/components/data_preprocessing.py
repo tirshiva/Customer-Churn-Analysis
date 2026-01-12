@@ -90,9 +90,7 @@ class DataPreprocessor:
                         )
                     else:
                         processed_data = X_reduced
-                    logger.info(
-                        f"Dimension reduction applied. New shape: {processed_data.shape}"
-                    )
+                    logger.info(f"Dimension reduction applied. New shape: {processed_data.shape}")
                 else:
                     logger.warning("Dimension reduction failed, using all features")
 
@@ -147,9 +145,7 @@ class DataPreprocessor:
             # Identify numerical and categorical columns
             numerical_cols = ["tenure", "MonthlyCharges", "TotalCharges"]
             categorical_cols = [
-                col
-                for col in df.columns
-                if col not in numerical_cols and col != self.target_column
+                col for col in df.columns if col not in numerical_cols and col != self.target_column
             ]
 
             # Fill numerical columns with median
@@ -166,9 +162,7 @@ class DataPreprocessor:
             # Fill categorical columns with mode
             for col in categorical_cols:
                 if col in df.columns:
-                    mode_val = (
-                        df[col].mode()[0] if not df[col].mode().empty else "Unknown"
-                    )
+                    mode_val = df[col].mode()[0] if not df[col].mode().empty else "Unknown"
                     missing_count = df[col].isna().sum()
                     if missing_count > 0:
                         df[col].fillna(mode_val, inplace=True)
@@ -187,24 +181,18 @@ class DataPreprocessor:
         try:
             numerical_cols = ["tenure", "MonthlyCharges", "TotalCharges"]
             categorical_cols = [
-                col
-                for col in df.columns
-                if col not in numerical_cols and col != self.target_column
+                col for col in df.columns if col not in numerical_cols and col != self.target_column
             ]
 
             # Apply one-hot encoding
             if categorical_cols:
                 df = pd.get_dummies(df, columns=categorical_cols, drop_first=False)
-                logger.info(
-                    f"One-hot encoded {len(categorical_cols)} categorical columns"
-                )
+                logger.info(f"One-hot encoded {len(categorical_cols)} categorical columns")
 
             return df
 
         except Exception as e:
-            logger.error(
-                f"Error encoding categorical variables: {str(e)}", exc_info=True
-            )
+            logger.error(f"Error encoding categorical variables: {str(e)}", exc_info=True)
             return df
 
     def get_feature_columns(self) -> List[str]:

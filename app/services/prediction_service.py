@@ -86,9 +86,7 @@ class PredictionService:
                 return None
 
             # Align features with model
-            aligned_data = self.data_processor.align_features(
-                processed_data, self.feature_names
-            )
+            aligned_data = self.data_processor.align_features(processed_data, self.feature_names)
             if aligned_data is None:
                 logger.error("Failed to align features")
                 return None
@@ -122,9 +120,7 @@ class PredictionService:
                 "status": "success",
             }
 
-            logger.info(
-                f"Prediction successful. Churn probability: {churn_probability:.2f}%"
-            )
+            logger.info(f"Prediction successful. Churn probability: {churn_probability:.2f}%")
             return result
 
         except Exception as e:

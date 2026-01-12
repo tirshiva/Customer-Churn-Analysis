@@ -44,8 +44,7 @@ class DataIngestion:
             self.data_info = {
                 "shape": self.raw_data.shape,
                 "columns": self.raw_data.columns.tolist(),
-                "memory_usage_mb": self.raw_data.memory_usage(deep=True).sum()
-                / 1024**2,
+                "memory_usage_mb": self.raw_data.memory_usage(deep=True).sum() / 1024**2,
                 "null_counts": self.raw_data.isnull().sum().to_dict(),
             }
 

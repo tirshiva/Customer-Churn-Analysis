@@ -49,18 +49,14 @@ class AdvancedMLPipeline:
             create_ensemble: Whether to create ensemble model
         """
         self.data_path = Path(data_path)
-        self.model_output_path = Path(model_output_path)
+        # Store base path - actual model name will be determined dynamically
+        self.model_output_base_path = Path(model_output_path)
         self.evaluation_output_path = (
-            evaluation_output_path
-            or self.model_output_path.parent / "evaluation_report.json"
+            evaluation_output_path or self.model_output_base_path.parent / "evaluation_report.json"
         )
-        self.model_comparison_path = (
-            self.model_output_path.parent / "model_comparison.json"
-        )
-        self.reducer_output_path = (
-            self.model_output_path.parent / "dimension_reducer.joblib"
-        )
-        self.visualizations_dir = self.model_output_path.parent / "visualizations"
+        self.model_comparison_path = self.model_output_base_path.parent / "model_comparison.json"
+        self.reducer_output_path = self.model_output_base_path.parent / "dimension_reducer.joblib"
+        self.visualizations_dir = self.model_output_base_path.parent / "visualizations"
         self.target_column = target_column
         self.random_state = random_state
         self.use_scaling = use_scaling
@@ -123,9 +119,7 @@ class AdvancedMLPipeline:
 
             # Step 3: Prepare Training Data
             logger.info("\n[3/6] Preparing Training Data")
-            if not self.model_trainer.prepare_data(
-                self.processed_data, self.target_column
-            ):
+            if not self.model_trainer.prepare_data(self.processed_data, self.target_column):
                 logger.error("Failed to prepare training data")
                 return False
 
@@ -187,17 +181,12 @@ class AdvancedMLPipeline:
                 "feature_importance": feature_importance,
             }
 
-            # Save model
-            logger.info(
-                f"\nSaving best model ({best_model_name}) to {self.model_output_path}"
-            )
+            # Save model (path will be determined dynamically based on model name)
+            logger.info(f"\nSaving best model ({best_model_name})...")
             self.save_model()
 
             # Save dimension reducer
-            if (
-                self.dimension_reducer is not None
-                and self.dimension_reducer.reducer is not None
-            ):
+            if self.dimension_reducer is not None and self.dimension_reducer.reducer is not None:
                 logger.info(f"Saving dimension reducer to {self.reducer_output_path}")
                 self.dimension_reducer.save(self.reducer_output_path)
 
@@ -246,14 +235,18 @@ class AdvancedMLPipeline:
 
             # Get best model results for metadata
             best_model_name = self.model_trainer.get_best_model_name()
+            if not best_model_name:
+                logger.error("Cannot determine model name for saving")
+                return False
+
             model_results = self.model_trainer.get_model_results()
             best_results = model_results.get(best_model_name, {})
 
             # Build a dynamic filename based on the best model name
-            safe_name = (best_model_name or "model").replace(" ", "_")
-            model_dir = self.model_output_path.parent
+            safe_name = best_model_name.replace(" ", "_").replace("/", "_")
+            model_dir = self.model_output_base_path.parent
             model_dir.mkdir(parents=True, exist_ok=True)
-            dynamic_model_path = model_dir / f"{safe_name}.joblib"
+            dynamic_model_path = model_dir / f"{safe_name}_model.joblib"
 
             # Save model with comprehensive metadata
             save_dict = {
@@ -271,9 +264,7 @@ class AdvancedMLPipeline:
             joblib.dump(save_dict, dynamic_model_path)
             logger.info(f"Best model ({best_model_name}) saved to {dynamic_model_path}")
             logger.info(f"  Test Accuracy: {best_results.get('test_score', 0):.4f}")
-            logger.info(
-                f"  CV Mean Accuracy: {best_results.get('cv_mean_score', 0):.4f}"
-            )
+            logger.info(f"  CV Mean Accuracy: {best_results.get('cv_mean_score', 0):.4f}")
             return True
 
         except Exception as e:

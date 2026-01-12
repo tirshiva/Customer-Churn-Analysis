@@ -19,12 +19,18 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # Virtual Environment
 venv/
 ENV/
 env/
 .venv
+dev/
+.conda/
 
 # IDE
 .vscode/
@@ -32,38 +38,75 @@ env/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
+.settings/
 
 # Environment variables
 .env
 .env.local
-dev/
+.env.*.local
 
 # Logs
 logs/
 *.log
+*.log.*
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb_checkpoints
 
-# Model files (if too large)
-# models/*.joblib
-# models/*.pkl
+# Model files (too large for git - use Git LFS or exclude)
+models/*.joblib
+models/*.pkl
+models/*.h5
+models/*.pth
+models/visualizations/*.png
+models/visualizations/*.jpg
+models/visualizations/*.pdf
 
-# Data files (if sensitive)
+# Data files (uncomment if sensitive or too large)
 # data/raw/*
 # data/processed/*
+# data/interim/*
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Testing
-.pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+.tox/
+.hypothesis/
+.pytest_cache/
+coverage.xml
+*.cover
+*.py,cover
 
 # Static files (if generated)
-# app/static/*
+# app/static/generated/*
 
 # Model visualizations (optional - uncomment to ignore)
 # models/visualizations/*.png
+
+# Pre-commit
+.pre-commit-config.yaml.bak
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~

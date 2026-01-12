@@ -44,9 +44,7 @@ class DataProcessor:
             if settings.REDUCER_PATH.exists():
                 self.dimension_reducer = DimensionReducer.load(settings.REDUCER_PATH)
                 if self.dimension_reducer:
-                    logger.info(
-                        f"Dimension reducer loaded from {settings.REDUCER_PATH}"
-                    )
+                    logger.info(f"Dimension reducer loaded from {settings.REDUCER_PATH}")
                     logger.info(f"  Method: {self.dimension_reducer.method}")
                     if self.dimension_reducer.selected_features:
                         logger.info(
@@ -113,10 +111,7 @@ class DataProcessor:
         """
         try:
             # Apply dimension reduction if available
-            if (
-                self.dimension_reducer is not None
-                and self.dimension_reducer.reducer is not None
-            ):
+            if self.dimension_reducer is not None and self.dimension_reducer.reducer is not None:
                 logger.info("Applying dimension reduction to input data...")
                 # First align with original features
                 original_features = self.dimension_reducer.original_feature_names
@@ -135,21 +130,15 @@ class DataProcessor:
                 reduced_data = self.dimension_reducer.transform(processed_data)
                 if reduced_data is not None:
                     processed_data = reduced_data
-                    logger.info(
-                        f"Dimension reduction applied. New shape: {processed_data.shape}"
-                    )
+                    logger.info(f"Dimension reduction applied. New shape: {processed_data.shape}")
                 else:
-                    logger.warning(
-                        "Dimension reduction failed, using original features"
-                    )
+                    logger.warning("Dimension reduction failed, using original features")
 
             # Ensure all model features are present
             for feature in model_features:
                 if feature not in processed_data.columns:
                     processed_data[feature] = 0
-                    logger.warning(
-                        f"Missing feature '{feature}' added with default value 0"
-                    )
+                    logger.warning(f"Missing feature '{feature}' added with default value 0")
 
             # Select only the features used by the model
             aligned_data = processed_data[model_features]

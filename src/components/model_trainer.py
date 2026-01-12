@@ -116,12 +116,8 @@ class AdvancedModelTrainer:
             logger.info(f"Data split completed:")
             logger.info(f"  Training set: {self.X_train.shape}")
             logger.info(f"  Test set: {self.X_test.shape}")
-            logger.info(
-                f"  Training target distribution: {self.y_train.value_counts().to_dict()}"
-            )
-            logger.info(
-                f"  Test target distribution: {self.y_test.value_counts().to_dict()}"
-            )
+            logger.info(f"  Training target distribution: {self.y_train.value_counts().to_dict()}")
+            logger.info(f"  Test target distribution: {self.y_test.value_counts().to_dict()}")
 
             # Scale features if enabled
             if self.use_scaling:
@@ -163,9 +159,7 @@ class AdvancedModelTrainer:
                             columns=self.X_train.columns,
                             index=range(len(X_train_resampled)),
                         )
-                        self.y_train = pd.Series(
-                            y_train_resampled, index=self.X_train.index
-                        )
+                        self.y_train = pd.Series(y_train_resampled, index=self.X_train.index)
                         logger.info(f"After SMOTE - Training set: {self.X_train.shape}")
                         logger.info(
                             f"After SMOTE - Target distribution: {self.y_train.value_counts().to_dict()}"
@@ -189,93 +183,78 @@ class AdvancedModelTrainer:
         """
         configs = {
             "random_forest": {
-                "model": RandomForestClassifier(
-                    random_state=self.random_state, n_jobs=-1
-                ),
+                "model": RandomForestClassifier(random_state=self.random_state, n_jobs=2),
                 "params": {
-                    # Reduced grid to keep search time reasonable
+                    # Minimal grid for faster training
                     "n_estimators": [100, 200],
                     "max_depth": [10, None],
                     "min_samples_split": [2, 5],
-                    "min_samples_leaf": [1, 2],
-                    "max_features": ["sqrt", "log2"],
                 },
             },
             "gradient_boosting": {
                 "model": GradientBoostingClassifier(random_state=self.random_state),
                 "params": {
                     "n_estimators": [100, 200],
-                    "learning_rate": [0.01, 0.1, 0.2],
-                    "max_depth": [3, 5, 7],
-                    "min_samples_split": [2, 5],
-                    "subsample": [0.8, 1.0],
+                    "learning_rate": [0.1, 0.2],
+                    "max_depth": [3, 5],
                 },
             },
             "adaboost": {
                 "model": AdaBoostClassifier(random_state=self.random_state),
                 "params": {
-                    "n_estimators": [50, 100, 200],
-                    "learning_rate": [0.01, 0.1, 1.0],
-                    "algorithm": ["SAMME", "SAMME.R"],
+                    "n_estimators": [50, 100],
+                    "learning_rate": [0.1, 1.0],
                 },
             },
             "extra_trees": {
-                "model": ExtraTreesClassifier(
-                    random_state=self.random_state, n_jobs=-1
-                ),
+                "model": ExtraTreesClassifier(random_state=self.random_state, n_jobs=2),
                 "params": {
                     "n_estimators": [100, 200],
-                    "max_depth": [10, 20, None],
-                    "min_samples_split": [2, 5],
-                    "max_features": ["sqrt", "log2"],
+                    "max_depth": [10, None],
                 },
             },
             "logistic_regression": {
                 "model": LogisticRegression(
-                    random_state=self.random_state, max_iter=1000, n_jobs=-1
+                    random_state=self.random_state, max_iter=1000, n_jobs=2
                 ),
                 "params": {
-                    "C": [0.001, 0.01, 0.1, 1, 10, 100],
-                    "penalty": ["l1", "l2", "elasticnet"],
-                    "solver": ["liblinear", "lbfgs", "saga"],
+                    "C": [0.1, 1, 10],
+                    "penalty": ["l1", "l2"],
+                    "solver": ["liblinear", "lbfgs"],
                 },
             },
             "svm": {
                 "model": SVC(random_state=self.random_state, probability=True),
                 "params": {
                     "C": [0.1, 1, 10],
-                    "kernel": ["rbf", "poly", "sigmoid"],
-                    "gamma": ["scale", "auto", 0.001, 0.01],
+                    "kernel": ["rbf", "poly"],
+                    "gamma": ["scale", "auto"],
                 },
             },
             "knn": {
-                "model": KNeighborsClassifier(n_jobs=-1),
+                "model": KNeighborsClassifier(n_jobs=2),
                 "params": {
-                    "n_neighbors": [3, 5, 7, 9, 11],
+                    "n_neighbors": [3, 5, 7],
                     "weights": ["uniform", "distance"],
-                    "metric": ["euclidean", "manhattan", "minkowski"],
                 },
             },
             "naive_bayes": {
                 "model": GaussianNB(),
-                "params": {"var_smoothing": [1e-9, 1e-8, 1e-7, 1e-6]},
+                "params": {"var_smoothing": [1e-8, 1e-7]},
             },
             "decision_tree": {
                 "model": DecisionTreeClassifier(random_state=self.random_state),
                 "params": {
-                    "max_depth": [5, 10, 20, None],
-                    "min_samples_split": [2, 5, 10],
-                    "min_samples_leaf": [1, 2, 4],
-                    "criterion": ["gini", "entropy"],
+                    "max_depth": [10, None],
+                    "min_samples_split": [2, 5],
                 },
             },
             "neural_network": {
-                "model": MLPClassifier(random_state=self.random_state, max_iter=500),
+                "model": MLPClassifier(random_state=self.random_state, max_iter=300),
                 "params": {
-                    "hidden_layer_sizes": [(50,), (100,), (50, 50), (100, 50)],
-                    "activation": ["relu", "tanh", "logistic"],
-                    "alpha": [0.0001, 0.001, 0.01],
-                    "learning_rate": ["constant", "adaptive"],
+                    "hidden_layer_sizes": [(50,), (100,)],
+                    "activation": ["relu", "tanh"],
+                    "alpha": [0.0001, 0.001],
                 },
             },
         }
@@ -290,15 +269,15 @@ class AdvancedModelTrainer:
             if name == "logistic_regression":
                 penalty = params.get("penalty", [])
                 solver = params.get("solver", [])
-                
+
                 # Filter incompatible combinations
                 valid_combinations = {
                     "l1": ["liblinear", "saga"],
                     "l2": ["liblinear", "lbfgs", "saga"],
                     "elasticnet": ["saga"],
-                    "none": ["lbfgs", "saga"]
+                    "none": ["lbfgs", "saga"],
                 }
-                
+
                 # If elasticnet is present, only allow saga solver
                 if "elasticnet" in penalty:
                     params["solver"] = [s for s in solver if s == "saga"]
@@ -309,7 +288,7 @@ class AdvancedModelTrainer:
                         if p in valid_combinations:
                             valid_solvers.update(valid_combinations[p])
                     params["solver"] = [s for s in solver if s in valid_solvers]
-                
+
                 # Remove penalty if no valid solvers remain
                 if not params["solver"]:
                     logger.warning(f"Logistic regression: No valid solvers for penalties {penalty}")
@@ -346,18 +325,30 @@ class AdvancedModelTrainer:
                 logger.info(f"{'='*70}")
 
                 try:
-                    # Create GridSearchCV
+                    # Calculate total combinations for logging
+                    total_combinations = 1
+                    for v in config["params"].values():
+                        total_combinations *= len(v)
+
+                    logger.info(f"  Parameter combinations: {total_combinations}")
+                    logger.info(f"  CV folds: {self.cv_folds}")
+                    logger.info(f"  Total fits: {total_combinations * self.cv_folds}")
+
+                    # Create GridSearchCV with simplified settings
                     grid_search = GridSearchCV(
                         estimator=config["model"],
                         param_grid=config["params"],
                         cv=cv,
                         scoring="accuracy",
-                        n_jobs=self.n_jobs,
-                        verbose=1,
+                        n_jobs=2,  # Limit parallel jobs to avoid resource contention
+                        verbose=0,  # Disable verbose to reduce overhead
+                        return_train_score=False,  # Skip train scores to save memory
                     )
 
                     # Train model
+                    logger.info("  Starting grid search...")
                     grid_search.fit(self.X_train, self.y_train)
+                    logger.info("  Grid search completed!")
 
                     # Get best model
                     best_model = grid_search.best_estimator_
@@ -389,15 +380,11 @@ class AdvancedModelTrainer:
 
                     logger.info(f"\n{model_name.upper()} Results:")
                     logger.info(f"  Best Parameters: {best_params}")
-                    logger.info(
-                        f"  CV Mean Score: {best_score:.4f} (+/- {cv_scores.std():.4f})"
-                    )
+                    logger.info(f"  CV Mean Score: {best_score:.4f} (+/- {cv_scores.std():.4f})")
                     logger.info(f"  Test Score: {test_score:.4f}")
 
                 except Exception as e:
-                    logger.error(
-                        f"Error training {model_name}: {str(e)}", exc_info=True
-                    )
+                    logger.error(f"Error training {model_name}: {str(e)}", exc_info=True)
                     continue
 
             # Find best model
@@ -465,9 +452,7 @@ class AdvancedModelTrainer:
             estimators = []
             for model_name, results in sorted_models:
                 estimators.append((model_name, results["model"]))
-                logger.info(
-                    f"  Adding {model_name} (Score: {results['test_score']:.4f})"
-                )
+                logger.info(f"  Adding {model_name} (Score: {results['test_score']:.4f})")
 
             # Create voting classifier
             ensemble = VotingClassifier(estimators=estimators, voting="soft", n_jobs=-1)

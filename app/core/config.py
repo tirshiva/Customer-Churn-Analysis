@@ -15,14 +15,12 @@ class Settings(BaseSettings):
     # Paths
     BASE_DIR: Path = Path(__file__).parent.parent.parent
     MODEL_DIR: Path = BASE_DIR / "models"
-    DATA_DIR: Path = BASE_DIR / "Scripts"
+    DATA_DIR: Path = BASE_DIR / "data" / "raw"
     TEMPLATES_DIR: Path = BASE_DIR / "app" / "templates"
     STATIC_DIR: Path = BASE_DIR / "app" / "static"
 
     # Model
-    MODEL_PATH: Path = (
-        MODEL_DIR / "best_model.joblib"
-    )  # Updated to use best_model.joblib
+    MODEL_PATH: Path = MODEL_DIR / "best_model.joblib"  # Updated to use best_model.joblib
     MODEL_NAME: str = "best_model.joblib"
     REDUCER_PATH: Path = MODEL_DIR / "dimension_reducer.joblib"
 

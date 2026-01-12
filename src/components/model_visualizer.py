@@ -129,9 +129,7 @@ class ModelVisualizer:
             return True
 
         except Exception as e:
-            logger.error(
-                f"Error creating model comparison plot: {str(e)}", exc_info=True
-            )
+            logger.error(f"Error creating model comparison plot: {str(e)}", exc_info=True)
             return False
 
     def plot_best_model_performance(
@@ -256,9 +254,7 @@ class ModelVisualizer:
             return True
 
         except Exception as e:
-            logger.error(
-                f"Error creating best model performance plot: {str(e)}", exc_info=True
-            )
+            logger.error(f"Error creating best model performance plot: {str(e)}", exc_info=True)
             return False
 
     def plot_learning_curve(
@@ -413,9 +409,7 @@ class ModelVisualizer:
             return True
 
         except Exception as e:
-            logger.error(
-                f"Error creating confusion matrix plot: {str(e)}", exc_info=True
-            )
+            logger.error(f"Error creating confusion matrix plot: {str(e)}", exc_info=True)
             return False
 
     def plot_metrics_comparison(
@@ -482,9 +476,7 @@ class ModelVisualizer:
             return True
 
         except Exception as e:
-            logger.error(
-                f"Error creating metrics comparison plot: {str(e)}", exc_info=True
-            )
+            logger.error(f"Error creating metrics comparison plot: {str(e)}", exc_info=True)
             return False
 
     def create_all_visualizations(
@@ -529,15 +521,10 @@ class ModelVisualizer:
             # 3. Learning curve (skip for ensemble models)
             try:
                 # Check if it's an ensemble model
-                if (
-                    hasattr(best_model, "estimators_")
-                    and len(best_model.estimators_) > 1
-                ):
+                if hasattr(best_model, "estimators_") and len(best_model.estimators_) > 1:
                     logger.info("Skipping learning curve for ensemble model")
                 else:
-                    self.plot_learning_curve(
-                        best_model, X_train, y_train, best_model_name
-                    )
+                    self.plot_learning_curve(best_model, X_train, y_train, best_model_name)
             except Exception as e:
                 logger.warning(f"Could not create learning curve: {str(e)}")
 

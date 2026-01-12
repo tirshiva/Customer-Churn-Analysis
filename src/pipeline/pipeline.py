@@ -45,12 +45,9 @@ class MLPipeline:
         self.data_path = Path(data_path)
         self.model_output_path = Path(model_output_path)
         self.evaluation_output_path = (
-            evaluation_output_path
-            or self.model_output_path.parent / "evaluation_report.json"
+            evaluation_output_path or self.model_output_path.parent / "evaluation_report.json"
         )
-        self.reducer_output_path = (
-            self.model_output_path.parent / "dimension_reducer.joblib"
-        )
+        self.reducer_output_path = self.model_output_path.parent / "dimension_reducer.joblib"
         self.target_column = target_column
         self.model_type = model_type
         self.random_state = random_state
@@ -106,9 +103,7 @@ class MLPipeline:
 
             # Step 3: Prepare Training Data
             logger.info("\n[3/5] Preparing Training Data")
-            if not self.model_trainer.prepare_data(
-                self.processed_data, self.target_column
-            ):
+            if not self.model_trainer.prepare_data(self.processed_data, self.target_column):
                 logger.error("Failed to prepare training data")
                 return False
 
@@ -153,10 +148,7 @@ class MLPipeline:
             self.save_model()
 
             # Save dimension reducer
-            if (
-                self.dimension_reducer is not None
-                and self.dimension_reducer.reducer is not None
-            ):
+            if self.dimension_reducer is not None and self.dimension_reducer.reducer is not None:
                 logger.info(f"Saving dimension reducer to {self.reducer_output_path}")
                 self.dimension_reducer.save(self.reducer_output_path)
 
