@@ -61,7 +61,7 @@ Customer-Churn-Analysis/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/tirshiva/Customer-Churn-Analysis.git
    cd Customer-Churn-Analysis
    ```
 
