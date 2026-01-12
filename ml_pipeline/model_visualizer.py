@@ -7,7 +7,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 import logging
-from sklearn.model_selection import learning_curve, validation_curve
+from sklearn.model_selection import learning_curve
 
 logger = logging.getLogger(__name__)
 

@@ -3,8 +3,7 @@
 import joblib
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
-import pandas as pd
+from typing import Dict, Any, Optional
 
 from app.core.config import settings
 from app.services.data_processor import DataProcessor

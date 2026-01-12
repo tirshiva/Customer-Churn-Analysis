@@ -1,7 +1,6 @@
 """Advanced model training module with multiple classifiers and GridSearchCV."""
 
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import (
     train_test_split,
     cross_val_score,
@@ -13,7 +12,6 @@ from sklearn.ensemble import (
     GradientBoostingClassifier,
     AdaBoostClassifier,
     VotingClassifier,
-    BaggingClassifier,
     ExtraTreesClassifier,
 )
 from sklearn.linear_model import LogisticRegression
@@ -23,14 +21,9 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.pipeline import Pipeline as ImbPipeline
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any
 import logging
-import joblib
-from pathlib import Path
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -113,7 +106,7 @@ class AdvancedModelTrainer:
                 stratify=y,
             )
 
-            logger.info(f"Data split completed:")
+            logger.info("Data split completed:")
             logger.info(f"  Training set: {self.X_train.shape}")
             logger.info(f"  Test set: {self.X_test.shape}")
             logger.info(f"  Training target distribution: {self.y_train.value_counts().to_dict()}")
@@ -143,7 +136,8 @@ class AdvancedModelTrainer:
                     min_class_count = pd.Series(self.y_train).value_counts().min()
                     if min_class_count < 3:
                         logger.warning(
-                            f"Not enough samples for SMOTE (min class: {min_class_count}). Skipping SMOTE."
+                            f"Not enough samples for SMOTE "
+                            f"(min class: {min_class_count}). Skipping SMOTE."
                         )
                     else:
                         smote = SMOTE(
@@ -161,9 +155,8 @@ class AdvancedModelTrainer:
                         )
                         self.y_train = pd.Series(y_train_resampled, index=self.X_train.index)
                         logger.info(f"After SMOTE - Training set: {self.X_train.shape}")
-                        logger.info(
-                            f"After SMOTE - Target distribution: {self.y_train.value_counts().to_dict()}"
-                        )
+                        target_dist = self.y_train.value_counts().to_dict()
+                        logger.info(f"After SMOTE - Target distribution: {target_dist}")
                 except Exception as e:
                     logger.warning(f"SMOTE failed: {str(e)}. Continuing without SMOTE.")
                     self.use_smote = False

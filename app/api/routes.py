@@ -117,7 +117,10 @@ async def predict_post(
                 "index.html",
                 {
                     "request": request,
-                    "error_message": "Please fill in all required fields (Tenure, Monthly Charges, Total Charges).",
+                    "error_message": (
+                        "Please fill in all required fields "
+                        "(Tenure, Monthly Charges, Total Charges)."
+                    ),
                 },
             )
 

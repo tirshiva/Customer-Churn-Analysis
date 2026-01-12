@@ -1,12 +1,9 @@
 """Data preprocessing module for cleaning and transforming data."""
 
 import pandas as pd
-import numpy as np
 from typing import Optional, List, Dict, Any
 import logging
 from sklearn.preprocessing import StandardScaler
-import joblib
-from pathlib import Path
 
 from ml_pipeline.dimension_reduction import DimensionReducer
 
@@ -156,7 +153,8 @@ class DataPreprocessor:
                     if missing_count > 0:
                         df[col].fillna(median_val, inplace=True)
                         logger.info(
-                            f"Filled {missing_count} missing values in {col} with median: {median_val}"
+                            f"Filled {missing_count} missing values in {col} "
+                            f"with median: {median_val}"
                         )
 
             # Fill categorical columns with mode

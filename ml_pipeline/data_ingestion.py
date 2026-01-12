@@ -1,7 +1,6 @@
 """Data ingestion module for loading and validating raw data."""
 
 import pandas as pd
-import numpy as np
 from pathlib import Path
 from typing import Optional, Dict, Any
 import logging

@@ -1,10 +1,8 @@
 """Data processing service."""
 
 import pandas as pd
-import numpy as np
 import logging
 from typing import Dict, Any, Optional
-from pathlib import Path
 
 from app.core.config import settings
 from ml_pipeline.dimension_reduction import DimensionReducer

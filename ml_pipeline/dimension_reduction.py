@@ -130,7 +130,7 @@ class DimensionReducer:
                 "selected_features": self.selected_features,
             }
 
-            logger.info(f"Dimension reduction completed:")
+            logger.info("Dimension reduction completed:")
             logger.info(f"  Method: {self.method}")
             logger.info(f"  Original features: {original_features}")
             logger.info(f"  Reduced features: {reduced_features}")
@@ -196,9 +196,8 @@ class DimensionReducer:
                 pca_temp.fit(X)
                 cumsum_variance = np.cumsum(pca_temp.explained_variance_ratio_)
                 n_components = np.argmax(cumsum_variance >= self.variance_threshold) + 1
-                logger.info(
-                    f"PCA: {n_components} components explain {self.variance_threshold*100}% variance"
-                )
+                variance_pct = self.variance_threshold * 100
+                logger.info(f"PCA: {n_components} components explain {variance_pct}% variance")
             else:
                 n_components = min(self.n_components, X.shape[1])
 

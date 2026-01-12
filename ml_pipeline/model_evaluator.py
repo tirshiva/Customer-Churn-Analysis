@@ -11,7 +11,7 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report,
 )
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 import logging
 import json
 from pathlib import Path
@@ -113,7 +113,7 @@ class ModelEvaluator:
             logger.info(f"Recall:    {recall:.4f}")
             logger.info(f"F1 Score:  {f1:.4f}")
             logger.info(f"ROC AUC:   {roc_auc:.4f}")
-            logger.info(f"\nConfusion Matrix:")
+            logger.info("\nConfusion Matrix:")
             logger.info(f"  TN: {tn}, FP: {fp}")
             logger.info(f"  FN: {fn}, TP: {tp}")
             logger.info("=" * 50)

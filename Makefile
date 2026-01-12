@@ -42,7 +42,11 @@ test:
 lint:
 	flake8 app/ ml_pipeline/ --max-line-length=100 --extend-ignore=E203,W503
 	black --check app/ ml_pipeline/ tests/
-	mypy app/ ml_pipeline/ --ignore-missing-imports
+	@if command -v mypy > /dev/null 2>&1; then \
+		mypy app/ ml_pipeline/ --ignore-missing-imports; \
+	else \
+		echo "mypy not installed, skipping type checking"; \
+	fi
 
 format:
 	black app/ ml_pipeline/ tests/
