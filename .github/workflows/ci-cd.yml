@@ -114,7 +114,7 @@ jobs:
           python train_model.py || echo "Model training failed or skipped"
 
       - name: Upload model artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trained-model
           path: models/
