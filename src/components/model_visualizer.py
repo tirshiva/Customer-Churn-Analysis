@@ -178,11 +178,11 @@ class ModelVisualizer:
             )
 
             # Add value labels
-            for bar, score in zip(bars, scores):
+            for idx, (bar, score) in enumerate(zip(bars, scores)):
                 height = bar.get_height()
                 ax1.text(
                     bar.get_x() + bar.get_width() / 2.0,
-                    height + errors[bars.index(bar)],
+                    height + errors[idx],
                     f"{score:.4f}",
                     ha="center",
                     va="bottom",

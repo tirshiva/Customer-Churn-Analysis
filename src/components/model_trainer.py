@@ -193,11 +193,12 @@ class AdvancedModelTrainer:
                     random_state=self.random_state, n_jobs=-1
                 ),
                 "params": {
-                    "n_estimators": [100, 200, 300],
-                    "max_depth": [10, 20, None],
-                    "min_samples_split": [2, 5, 10],
-                    "min_samples_leaf": [1, 2, 4],
-                    "max_features": ["sqrt", "log2", None],
+                    # Reduced grid to keep search time reasonable
+                    "n_estimators": [100, 200],
+                    "max_depth": [10, None],
+                    "min_samples_split": [2, 5],
+                    "min_samples_leaf": [1, 2],
+                    "max_features": ["sqrt", "log2"],
                 },
             },
             "gradient_boosting": {
@@ -287,12 +288,32 @@ class AdvancedModelTrainer:
 
             # Remove incompatible combinations
             if name == "logistic_regression":
-                # Remove elasticnet if solver doesn't support it
-                if "elasticnet" in params.get("penalty", []):
-                    valid_solvers = ["saga"]
-                    params["solver"] = [
-                        s for s in params.get("solver", []) if s in valid_solvers
-                    ]
+                penalty = params.get("penalty", [])
+                solver = params.get("solver", [])
+                
+                # Filter incompatible combinations
+                valid_combinations = {
+                    "l1": ["liblinear", "saga"],
+                    "l2": ["liblinear", "lbfgs", "saga"],
+                    "elasticnet": ["saga"],
+                    "none": ["lbfgs", "saga"]
+                }
+                
+                # If elasticnet is present, only allow saga solver
+                if "elasticnet" in penalty:
+                    params["solver"] = [s for s in solver if s == "saga"]
+                else:
+                    # Filter solvers based on penalties
+                    valid_solvers = set()
+                    for p in penalty:
+                        if p in valid_combinations:
+                            valid_solvers.update(valid_combinations[p])
+                    params["solver"] = [s for s in solver if s in valid_solvers]
+                
+                # Remove penalty if no valid solvers remain
+                if not params["solver"]:
+                    logger.warning(f"Logistic regression: No valid solvers for penalties {penalty}")
+                    continue
 
             filtered_configs[name] = {"model": model, "params": params}
 
@@ -459,12 +480,36 @@ class AdvancedModelTrainer:
             logger.info(f"\nEnsemble Test Score: {ensemble_score:.4f}")
 
             # Compare with best single model
-            if ensemble_score > self.model_results[self.best_model_name]["test_score"]:
-                logger.info("Ensemble performs better than best single model!")
+            if self.best_model_name and self.best_model_name in self.model_results:
+                best_single_score = self.model_results[self.best_model_name]["test_score"]
+                if ensemble_score > best_single_score:
+                    logger.info("Ensemble performs better than best single model!")
+                    self.best_model = ensemble
+                    self.best_model_name = "ensemble"
+                    # Store ensemble results
+                    self.model_results["ensemble"] = {
+                        "test_score": ensemble_score,
+                        "cv_mean_score": ensemble_score,  # Approximate
+                        "cv_std_score": 0.0,
+                        "best_params": {},
+                        "cv_scores": [],
+                        "model": ensemble,
+                    }
+                else:
+                    logger.info("Best single model performs better than ensemble")
+            else:
+                # If no best model was selected, make ensemble the best
+                logger.info("No previous best model found. Setting ensemble as best model.")
                 self.best_model = ensemble
                 self.best_model_name = "ensemble"
-            else:
-                logger.info("Best single model performs better than ensemble")
+                self.model_results["ensemble"] = {
+                    "test_score": ensemble_score,
+                    "cv_mean_score": ensemble_score,
+                    "cv_std_score": 0.0,
+                    "best_params": {},
+                    "cv_scores": [],
+                    "model": ensemble,
+                }
 
             return ensemble
 

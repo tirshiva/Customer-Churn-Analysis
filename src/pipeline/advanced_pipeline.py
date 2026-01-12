@@ -152,6 +152,9 @@ class AdvancedMLPipeline:
                 logger.error("No model available for evaluation")
                 return False
 
+            # Get updated model results (may include ensemble)
+            model_results = self.model_trainer.get_model_results()
+
             evaluation_results = self.model_evaluator.evaluate(
                 best_model, self.model_trainer.X_test, self.model_trainer.y_test
             )
@@ -241,12 +244,16 @@ class AdvancedMLPipeline:
                 logger.error("No model to save")
                 return False
 
-            self.model_output_path.parent.mkdir(parents=True, exist_ok=True)
-
             # Get best model results for metadata
             best_model_name = self.model_trainer.get_best_model_name()
             model_results = self.model_trainer.get_model_results()
             best_results = model_results.get(best_model_name, {})
+
+            # Build a dynamic filename based on the best model name
+            safe_name = (best_model_name or "model").replace(" ", "_")
+            model_dir = self.model_output_path.parent
+            model_dir.mkdir(parents=True, exist_ok=True)
+            dynamic_model_path = model_dir / f"{safe_name}.joblib"
 
             # Save model with comprehensive metadata
             save_dict = {
@@ -261,10 +268,8 @@ class AdvancedMLPipeline:
                 "training_info": self.model_trainer.get_training_info(),
             }
 
-            joblib.dump(save_dict, self.model_output_path)
-            logger.info(
-                f"Best model ({best_model_name}) saved to {self.model_output_path}"
-            )
+            joblib.dump(save_dict, dynamic_model_path)
+            logger.info(f"Best model ({best_model_name}) saved to {dynamic_model_path}")
             logger.info(f"  Test Accuracy: {best_results.get('test_score', 0):.4f}")
             logger.info(
                 f"  CV Mean Accuracy: {best_results.get('cv_mean_score', 0):.4f}"

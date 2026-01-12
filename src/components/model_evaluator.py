@@ -50,11 +50,39 @@ class ModelEvaluator:
             precision = precision_score(y_test, y_pred, zero_division=0)
             recall = recall_score(y_test, y_pred, zero_division=0)
             f1 = f1_score(y_test, y_pred, zero_division=0)
-            roc_auc = roc_auc_score(y_test, y_pred_proba)
+            
+            # ROC AUC - handle edge cases
+            try:
+                # Check if we have both classes in y_test
+                unique_classes = len(np.unique(y_test))
+                if unique_classes < 2:
+                    logger.warning("Only one class present in y_test. Cannot calculate ROC AUC.")
+                    roc_auc = 0.0
+                else:
+                    roc_auc = roc_auc_score(y_test, y_pred_proba)
+            except Exception as e:
+                logger.warning(f"Error calculating ROC AUC: {str(e)}. Setting to 0.0")
+                roc_auc = 0.0
 
-            # Confusion matrix
+            # Confusion matrix - handle edge cases
             cm = confusion_matrix(y_test, y_pred)
-            tn, fp, fn, tp = cm.ravel()
+            try:
+                # Check if confusion matrix is 2x2
+                if cm.shape == (2, 2):
+                    tn, fp, fn, tp = cm.ravel()
+                elif cm.shape == (1, 1):
+                    # Only one class predicted/actual
+                    if y_test.iloc[0] == 0:
+                        tn, fp, fn, tp = cm[0, 0], 0, 0, 0
+                    else:
+                        tn, fp, fn, tp = 0, 0, 0, cm[0, 0]
+                else:
+                    # Handle other edge cases
+                    logger.warning(f"Unexpected confusion matrix shape: {cm.shape}")
+                    tn, fp, fn, tp = 0, 0, 0, 0
+            except Exception as e:
+                logger.error(f"Error processing confusion matrix: {str(e)}")
+                tn, fp, fn, tp = 0, 0, 0, 0
 
             # Classification report
             class_report = classification_report(
@@ -114,25 +142,58 @@ class ModelEvaluator:
             Dictionary mapping feature names to importance scores
         """
         try:
-            if not hasattr(model, "feature_importances_"):
+            # Handle ensemble models (VotingClassifier)
+            if hasattr(model, "estimators_"):
+                logger.info("Calculating feature importance for ensemble model...")
+                all_importances = []
+                
+                for name, estimator in model.named_estimators_.items():
+                    if hasattr(estimator, "feature_importances_"):
+                        all_importances.append(estimator.feature_importances_)
+                    else:
+                        logger.debug(f"Estimator {name} does not support feature importances")
+                
+                if not all_importances:
+                    logger.warning("No estimators in ensemble support feature importances")
+                    return {}
+                
+                # Average importances across all estimators
+                importances = np.mean(all_importances, axis=0)
+                feature_importance = dict(zip(feature_names, importances))
+                
+                # Sort by importance
+                sorted_importance = dict(
+                    sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
+                )
+                
+                logger.info("Top 10 Most Important Features (Ensemble Average):")
+                for i, (feature, importance) in enumerate(
+                    list(sorted_importance.items())[:10], 1
+                ):
+                    logger.info(f"  {i}. {feature}: {importance:.4f}")
+                
+                return sorted_importance
+            
+            # Handle regular models with feature_importances_
+            elif hasattr(model, "feature_importances_"):
+                importances = model.feature_importances_
+                feature_importance = dict(zip(feature_names, importances))
+
+                # Sort by importance
+                sorted_importance = dict(
+                    sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
+                )
+
+                logger.info("Top 10 Most Important Features:")
+                for i, (feature, importance) in enumerate(
+                    list(sorted_importance.items())[:10], 1
+                ):
+                    logger.info(f"  {i}. {feature}: {importance:.4f}")
+
+                return sorted_importance
+            else:
                 logger.warning("Model does not support feature importances")
                 return {}
-
-            importances = model.feature_importances_
-            feature_importance = dict(zip(feature_names, importances))
-
-            # Sort by importance
-            sorted_importance = dict(
-                sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
-            )
-
-            logger.info("Top 10 Most Important Features:")
-            for i, (feature, importance) in enumerate(
-                list(sorted_importance.items())[:10], 1
-            ):
-                logger.info(f"  {i}. {feature}: {importance:.4f}")
-
-            return sorted_importance
 
         except Exception as e:
             logger.error(f"Error getting feature importance: {str(e)}", exc_info=True)
